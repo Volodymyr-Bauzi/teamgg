@@ -42,7 +42,11 @@ export const applicationRouter = createTRPCRouter({
       return await ctx.db.application.create({
         data: {
           ...input,
-          userId: ctx.user?.id,
+          userId:
+            ctx.user?.id ??
+            (() => {
+              throw new Error('User ID is required');
+            })(),
         },
       });
     }),
@@ -50,6 +54,6 @@ export const applicationRouter = createTRPCRouter({
   delete: publicProcedure
     .input(z.object({id: z.string()}))
     .mutation(async ({ctx, input}) => {
-      return await (await ctx).db.application.delete({where: {id: input.id}});
+      return await ctx.db.application.delete({where: {id: input.id}});
     }),
 });
