@@ -6,20 +6,22 @@ import {httpBatchLink} from '@trpc/client';
 import {SessionProvider} from 'next-auth/react';
 import superjson from 'superjson';
 import {ThemeProvider} from 'next-themes';
-import {type ReactNode} from 'react';
+import {useState, type ReactNode} from 'react';
 import {Toaster} from '@/components/ui/toaster';
 
 export default function Providers({children}: {children: ReactNode}) {
-  const queryClient = new QueryClient();
+  const [queryClient] = useState(() => new QueryClient());
 
-  const trpcClient = trpc.createClient({
-    links: [
-      httpBatchLink({
-        url: '/api/trpc',
-        transformer: superjson,
-      }),
-    ],
-  });
+  const [trpcClient] = useState(() =>
+    trpc.createClient({
+      links: [
+        httpBatchLink({
+          url: '/api/trpc',
+          transformer: superjson,
+        }),
+      ],
+    })
+  );
 
   return (
     <SessionProvider refetchInterval={5 * 60} refetchOnWindowFocus={true}>

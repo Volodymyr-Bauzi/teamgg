@@ -1,7 +1,7 @@
 import {z} from 'zod';
-import {router, publicProcedure, protectedProcedure} from '../trpc';
+import {createTRPCRouter, publicProcedure, protectedProcedure} from '../trpc';
 
-export const applicationRouter = router({
+export const applicationRouter = createTRPCRouter({
   list: publicProcedure
     .input(
       z.object({
@@ -14,15 +14,13 @@ export const applicationRouter = router({
       const {gameId, page, limit} = input;
 
       const [items, total] = await Promise.all([
-        (
-          await ctx
-        ).db.application.findMany({
+        ctx.db.application.findMany({
           where: {gameId},
           orderBy: {createdAt: 'desc'},
           skip: (page - 1) * limit,
           take: limit,
         }),
-        (await ctx).db.application.count({where: {gameId}}),
+        ctx.db.application.count({where: {gameId}}),
       ]);
       return {
         items,
@@ -41,12 +39,10 @@ export const applicationRouter = router({
       })
     )
     .mutation(async ({ctx, input}) => {
-      return await (
-        await ctx
-      ).db.application.create({
+      return await ctx.db.application.create({
         data: {
           ...input,
-          userId: ctx.user.id,
+          userId: ctx.user?.id,
         },
       });
     }),

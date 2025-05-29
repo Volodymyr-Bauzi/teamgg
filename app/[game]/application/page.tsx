@@ -2,7 +2,7 @@
 
 import {useParams} from 'next/navigation';
 import {useSession} from 'next-auth/react';
-import ApplicationForm from '@/app/components/applications/ApplicationForm';
+import ApplicationForm from '@/components/applications/ApplicationForm';
 import styles from '@/app/styles/GamePage.module.css';
 
 export default function ApplicationFormPage() {

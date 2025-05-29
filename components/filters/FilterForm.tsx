@@ -1,7 +1,7 @@
 'use client';
 
 import {useEffect} from 'react';
-import {gameFilterConfig} from '../../utils/gameFilterConfig';
+import {gameFilterConfig} from '../../app/utils/gameFilterConfig';
 import styles from '../../styles/Filters.module.css';
 import {useFilterContext} from '@/app/context/FilterContext';
 

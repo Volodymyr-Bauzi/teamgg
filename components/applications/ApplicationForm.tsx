@@ -1,11 +1,14 @@
 'use client';
 
 import {useState} from 'react';
-import {gameFilterConfig} from '../../utils/gameFilterConfig';
+import {gameFilterConfig} from '../../app/utils/gameFilterConfig';
 import {trpc} from '@/lib/trpc/client';
 import {useSession} from 'next-auth/react';
+import {useGameStore} from '@/lib/stores/use-game-store';
 
-export default function ApplicationForm({gameId}: {gameId: string}) {
+export default function ApplicationForm() {
+  const gameId = useGameStore((state) => state.gameId);
+  if (!gameId) return null;
   const config = gameFilterConfig[gameId];
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [contact, setContact] = useState('');

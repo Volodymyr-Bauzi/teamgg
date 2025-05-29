@@ -6,7 +6,7 @@ import {Moon, Sun} from 'lucide-react';
 import {useSession, signIn, signOut} from 'next-auth/react';
 
 const Header = () => {
-  const [theme, setTheme] = useTheme();
+  const {theme, setTheme} = useTheme();
   const {data: session} = useSession();
 
   return (

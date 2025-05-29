@@ -1,7 +1,4 @@
-// lib/auth.ts
 import {getServerSession} from 'next-auth';
-import {authOptions} from '@/app/api/auth/[...nextauth]/route'; // adjust path
+import {authOptions} from '@/app/api/auth/[...nextauth]/route';
 
-export function getAuthSession() {
-  return getServerSession(authOptions);
-}
+export const getAuthSession = () => getServerSession(authOptions);

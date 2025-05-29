@@ -1,8 +1,9 @@
-import {prisma} from '@/lib/db';
+import {Session} from 'next-auth';
+import {db} from '@/lib/db';
 
-export async function createContext() {
-  return {
-    db: prisma,
-  };
-}
-export type Context = ReturnType<typeof createContext>;
+export type Context = {
+  session: Session | null;
+  headers: Headers;
+  db: typeof db;
+  user?: Session['user'];
+};

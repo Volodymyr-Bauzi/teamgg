@@ -1,23 +1,23 @@
 import {initTRPC, TRPCError} from '@trpc/server';
 import superjson from 'superjson';
 import {ZodError} from 'zod';
-const {getServerSession} = require('next-auth');
+import {getServerSession} from 'next-auth';
+import {authOptions} from '@/lib/auth-options';
+import {db} from '@/lib/db';
 import {Context} from './context';
-import {error} from 'console';
 
 export const createTRPCContext = async (opts: {headers: Headers}) => {
-  const session = await getServerSession({
-    req: opts.headers as any,
-    res: {} as any,
-  });
+  const session = await getServerSession(authOptions);
 
   return {
     session,
-    ...opts,
+    headers: opts.headers,
+    db, // Assuming db is a Prisma client instance or similar
+    user: session?.user || null,
   };
 };
 
-const t = initTRPC.context<typeof createTRPCContext>().create({
+const t = initTRPC.context<Context>().create({
   transformer: superjson,
   errorFormatter({shape, error}) {
     return {
@@ -41,7 +41,9 @@ const enforceUserIsAuthed = t.middleware(async ({ctx, next}) => {
 
   return next({
     ctx: {
+      ...ctx,
       session: {...ctx.session, user: ctx.session.user},
+      user: ctx.user,
     },
   });
 });

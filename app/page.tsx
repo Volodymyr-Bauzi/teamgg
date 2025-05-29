@@ -1,7 +1,7 @@
 'use client';
 
 import styles from './styles/Home.module.css';
-import GameList from './components/GameList';
+import GameList from '../components/GameList';
 import {games} from './data/games';
 
 export default function Home() {
