@@ -1,0 +1,18 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Application {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId // MongoDB ObjectId
+  gameId    String // ID of the game
+  userId    String // ID of the user
+  contact   String // Contact information
+  tags      Json // JSON object for tags
+  createdAt DateTime @default(now()) // Timestamp for when the application was created
+}

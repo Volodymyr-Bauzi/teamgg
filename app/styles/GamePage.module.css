@@ -1,0 +1,110 @@
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 16px;
+  background-color: #f9f9f9;
+  min-height: calc(100vh - 64px); /* Adjust for header height */
+}
+
+.leftSidebar {
+  flex: 1;
+  max-width: 200px;
+  background-color: #ffffff;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.content {
+  flex: 3;
+  background-color: #ffffff;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.rightSidebar {
+  flex: 1;
+  max-width: 200px;
+  background-color: #ffffff;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.appList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.applicationCard {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.applicationCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.applicationCard h3 {
+  font-size: 1.25rem;
+  margin-bottom: 8px;
+  color: #333333;
+}
+
+.applicationCard p {
+  margin: 4px 0;
+  color: #666666;
+}
+
+.applicationCard ul {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0;
+}
+
+.applicationCard ul li {
+  margin: 4px 0;
+  color: #444444;
+}
+
+.noApplications {
+  text-align: center;
+  color: #999999;
+  font-size: 1rem;
+  margin-top: 16px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.pagination button {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.pagination button:hover {
+  background-color: #007bff;
+  color: #ffffff;
+}
+
+.pagination button:disabled {
+  background-color: #f0f0f0;
+  color: #cccccc;
+  cursor: not-allowed;
+}

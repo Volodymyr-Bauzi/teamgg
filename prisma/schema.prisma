@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Application {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId // MongoDB ObjectId
+  gameId    String   // ID of the game
+  userId    String   // ID of the user
+  contact   String   // Contact information
+  tags      Json     // JSON object for tags
+  createdAt DateTime @default(now()) // Timestamp for when the application was created
+
+  @@index([gameId, createdAt(sort: Desc)])
+}
+
+model User {
+  id            String   @id @default(cuid()) @map("_id")
+  name          String?
+  email         String?  @unique
+  emailVerified DateTime?
+  image         String?
+
+  accounts      Account[]
+  sessions      Session[]
+}
+
+model Account {
+  id                String   @id @default(cuid()) @map("_id")
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  access_token      String? @map("access_token")
+  token_type        String? @map("token_type")
+  scope             String? @map("scope")
+  expires_at        Int?    @map("expires_at")
+  refresh_token     String? @map("refresh_token")
+
+  user User @relation(fields: [userId], references: [id])
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid()) @map("_id")
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id])
+}
