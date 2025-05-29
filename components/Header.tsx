@@ -15,9 +15,21 @@ const Header = () => {
     setIsMounted(true);
   }, []);
 
+  // Prevent flash of incorrect theme
   if (!isMounted) {
-    // Prevents hydration mismatch by ensuring the component is mounted before rendering
-    return null;
+    return (
+      <div className="header">
+        <div className="header-container">
+          <h1>Team GG</h1>
+          <div className="theme-toggle">
+            <Button className="theme-button">
+              <Sun />
+            </Button>
+            <Button disabled>Loading...</Button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (

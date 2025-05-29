@@ -2,7 +2,7 @@
 
 import {useEffect} from 'react';
 import {gameFilterConfig} from '../../app/utils/gameFilterConfig';
-import styles from '../../styles/Filters.module.css';
+import styles from '@app/styles/Filters.module.css';
 import {useFilterContext} from '@/app/context/FilterContext';
 
 export default function FilterForm({gameId}: {gameId: string}) {

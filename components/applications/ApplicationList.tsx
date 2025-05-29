@@ -1,7 +1,7 @@
 // app/components/applications/ApplicationList.tsx
 
 import {useFilterContext} from '@/app/context/FilterContext';
-import styles from '../../styles/GamePage.module.css';
+import styles from '@app/styles/GamePage.module.css';
 import ApplicationCard from './ApplicationCard';
 import {useState} from 'react';
 import Pagination from '../Pagination';
