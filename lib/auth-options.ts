@@ -15,13 +15,21 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    session: ({session, token}: {session: any; token: any}) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: token.sub, // Assuming the user ID is stored in the token
-      },
-    }),
+    async jwt({token, user}) {
+      if (user) {
+        token.sub = user.id;
+      }
+      return token;
+    },
+    async session({session, token}: {session: any; token: any}) {
+      if (token?.id && session.user) {
+        session.user.id = token.id as string;
+      }
+      return session;
+    },
+  },
+  session: {
+    strategy: 'jwt',
   },
   pages: {
     signIn: '/auth/signin',
