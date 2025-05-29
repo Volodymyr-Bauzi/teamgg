@@ -13,12 +13,12 @@ export type Context = {
   user?: Session['user'];
 };
 
-export async function createContext(req: NextRequest): Promise<Context> {
+export async function createContext(opts: {req: Request}): Promise<Context> {
   const session = await getServerSession(authOptions);
   return {
     session,
     db,
-    headers: req.headers,
+    headers: opts.req.headers,
     user: session?.user,
   };
 }
