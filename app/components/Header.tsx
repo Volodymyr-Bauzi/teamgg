@@ -1,23 +1,34 @@
 'use client';
 
-import {useState} from 'react';
-import LoginButton from './LoginButton';
+import {useTheme} from 'next-themes';
+import {Button} from '@/components/ui/button';
+import {Moon, Sun} from 'lucide-react';
+import {useSession, signIn, signOut} from 'next-auth/react';
 
 const Header = () => {
-  const [isDarkTheme, setIsDarkTheme] = useState(false);
-  const toggleTheme = () => {
-    setIsDarkTheme((prev) => !prev);
-    document.documentElement.classList.toggle('dark', !isDarkTheme);
-  };
+  const [theme, setTheme] = useTheme();
+  const {data: session} = useSession();
 
   return (
     <div className="header">
-      <h1>Team GG</h1>
-      <div className="theme-toggle">
-        <button onClick={toggleTheme} className="theme-button">
-          {isDarkTheme ? 'Light Mode' : 'Dark Mode'}
-        </button>
-        <LoginButton />
+      <div className="header-container">
+        <h1>Team GG</h1>
+        <div className="theme-toggle">
+          <Button
+            variant="ghost"
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            className="theme-button"
+          >
+            {theme === 'dark' ? <Sun /> : <Moon />}
+          </Button>
+          {session ? (
+            <Button variant="outline" onclick={() => signOut()}>
+              Sign Out
+            </Button>
+          ) : (
+            <Button onClick={() => signIn()}>Sign In</Button>
+          )}
+        </div>
       </div>
     </div>
   );

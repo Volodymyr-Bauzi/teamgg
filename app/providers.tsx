@@ -5,8 +5,11 @@ import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import {httpBatchLink} from '@trpc/client';
 import {SessionProvider} from 'next-auth/react';
 import superjson from 'superjson';
+import {ThemeProvider} from 'next-themes';
+import {type ReactNode} from 'react';
+import {Toaster} from '@/components/ui/toaster';
 
-export default function Providers({children}: {children: React.ReactNode}) {
+export default function Providers({children}: {children: ReactNode}) {
   const queryClient = new QueryClient();
 
   const trpcClient = trpc.createClient({
@@ -22,7 +25,15 @@ export default function Providers({children}: {children: React.ReactNode}) {
     <SessionProvider refetchInterval={5 * 60} refetchOnWindowFocus={true}>
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
         <QueryClientProvider client={queryClient}>
-          {children}
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+            <Toaster />
+          </ThemeProvider>
         </QueryClientProvider>
       </trpc.Provider>
     </SessionProvider>
