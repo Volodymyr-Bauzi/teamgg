@@ -20,7 +20,7 @@ export default function ApplicationFormPage() {
   return (
     <div className={styles.content}>
       <h2>Submit Application</h2>
-      <ApplicationForm gameId={game as string} />
+      <ApplicationForm />
     </div>
   );
 }

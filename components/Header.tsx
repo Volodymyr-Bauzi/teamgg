@@ -15,16 +15,13 @@ const Header = () => {
         <h1>Team GG</h1>
         <div className="theme-toggle">
           <Button
-            variant="ghost"
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
             className="theme-button"
           >
             {theme === 'dark' ? <Sun /> : <Moon />}
           </Button>
           {session ? (
-            <Button variant="outline" onclick={() => signOut()}>
-              Sign Out
-            </Button>
+            <Button onClick={() => signOut()}>Sign Out</Button>
           ) : (
             <Button onClick={() => signIn()}>Sign In</Button>
           )}
