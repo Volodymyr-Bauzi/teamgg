@@ -1,5 +1,5 @@
 import {PrismaAdapter} from '@next-auth/prisma-adapter';
-import {PrismaClient} from '@prisma/client';
+import {PrismaClient} from './prisma/client';
 import {type GetServerSidePropsContext} from 'next';
 import DiscordProvider from 'next-auth/providers/discord';
 import {getServerSession, type NextAuthOptions} from 'next-auth';

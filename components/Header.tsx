@@ -5,11 +5,17 @@ import {Button} from '@/components/ui/button';
 import {Moon, Sun} from 'lucide-react';
 import {useSession, signIn, signOut} from 'next-auth/react';
 import {useEffect, useState} from 'react';
+import {useRouter} from 'next/navigation';
 
 const Header = () => {
+  const router = useRouter();
   const {theme, setTheme} = useTheme();
   const {data: session} = useSession();
   const [isMounted, setIsMounted] = useState(false);
+
+  const navigateHome = () => {
+    router.push('/');
+  };
 
   useEffect(() => {
     setIsMounted(true);
@@ -20,7 +26,7 @@ const Header = () => {
     return (
       <div className="header">
         <div className="header-container">
-          <h1>Team GG</h1>
+          <h1 onClick={navigateHome} style={{ cursor: 'pointer' }}>Team GG</h1>
           <div className="theme-toggle">
             <Button className="theme-button">
               <Sun />
@@ -35,7 +41,7 @@ const Header = () => {
   return (
     <div className="header">
       <div className="header-container">
-        <h1>Team GG</h1>
+        <h1 onClick={navigateHome} style={{ cursor: 'pointer' }}>Team GG</h1>
         <div className="theme-toggle">
           <Button
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}

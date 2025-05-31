@@ -1,20 +1,19 @@
 'use client';
 
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
+import {useParams} from 'next/navigation';
 import {gameFilterConfig} from '../../app/utils/gameFilterConfig';
 import {trpc} from '@/lib/trpc/client';
-import {useGameStore} from '@/lib/stores/use-game-store';
 import {toast} from 'sonner';
 import '../styles/ApplicationForm.css'; // Assuming you have a CSS file for styles
 
 export default function ApplicationForm() {
-  const gameId = useGameStore((state) => state.gameId);
-  if (!gameId) return null;
-
-  const config = gameFilterConfig[gameId];
+  // All hooks must be called unconditionally at the top level
+  const params = useParams();
+  const gameId = params?.game as string;
+  const [isLoading, setIsLoading] = useState(true);
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [contact, setContact] = useState('');
-
   const utils = trpc.useUtils();
   const createApp = trpc.application.create.useMutation({
     onSuccess: () => {
@@ -28,6 +27,26 @@ export default function ApplicationForm() {
       console.error('Error submitting application:', error);
     },
   });
+  
+  useEffect(() => {
+    if (gameId) {
+      setIsLoading(false);
+    }
+  }, [gameId]);
+
+  // Early returns after all hooks
+  if (isLoading) {
+    return <div className="loading-message">Loading game data...</div>;
+  }
+  
+  if (!gameId) {
+    return <div className="error-message">Game ID not found in URL.</div>;
+  }
+
+  const config = gameFilterConfig[gameId];
+  if (!config) {
+    return <div className="error-message">Configuration not found for this game. Please try another game.</div>;
+  }
 
   const handleChange = (key: string, value: string) => {
     setFormData((prev) => ({...prev, [key]: value}));
