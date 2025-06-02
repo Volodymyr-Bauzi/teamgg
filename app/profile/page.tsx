@@ -24,7 +24,12 @@ export default function ProfilePage() {
   });
 
   // Create a preview URL for the selected image
-  const handleFileSelect = useCallback((file: File) => {
+  const handleFileSelect = useCallback((file: File | null) => {
+    if (!file) {
+      setIsUploadModalOpen(true);
+      return;
+    }
+    
     setSelectedFile(file);
     const url = URL.createObjectURL(file);
     setPreviewUrl(url);

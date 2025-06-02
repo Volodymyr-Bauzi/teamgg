@@ -6,7 +6,7 @@ import Avatar, { AvatarProps } from './Avatar';
 import styles from './EditableAvatar.module.css';
 
 interface EditableAvatarProps extends Omit<AvatarProps, 'onChange'> {
-  onChange: (file: File) => void;
+  onChange: (file: File | null) => void;
   className?: string;
 }
 
