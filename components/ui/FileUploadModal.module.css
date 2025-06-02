@@ -79,13 +79,28 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
 }
 
 .previewImage {
   max-width: 100%;
   max-height: 400px;
   object-fit: contain;
-  border-radius: 4px;
+  border-radius: 50%;
+  aspect-ratio: 1;
+  width: 100%;
+  height: 100%;
+  object-position: center;
+}
+
+.cropperWrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 400px;
 }
 
 .dropZoneContent {
@@ -128,9 +143,26 @@
 
 .actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
   gap: 1rem;
   margin-top: 1.5rem;
+}
+
+.actionGroup {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.cropButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cropButton svg {
+  margin-right: 0.25rem;
 }
 
 .uploadButton,

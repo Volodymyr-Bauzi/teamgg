@@ -35,57 +35,57 @@ export default function ProfilePage() {
     setPreviewUrl(url);
     setIsUploadModalOpen(true);
   }, []);
-  
-  const handleUpload = useCallback(() => {
-    if (selectedFile) {
-      uploadProfilePicture(selectedFile);
-      setIsUploadModalOpen(false);
-    }
-  }, [selectedFile]);
 
-  const uploadProfilePicture = async (file: File) => {
-    if (!file) return;
+  const handleFileUpload = useCallback(async (file: File) => {
+    if (!file || !session) return;
     
     setIsLoading(true);
     setError('');
     
     try {
+      // Create form data
       const formData = new FormData();
       formData.append('file', file);
       
+      // Upload the file
       const response = await fetch('/api/upload-profile-picture', {
         method: 'POST',
         body: formData,
-        // Important: Don't set Content-Type header, let the browser set it with the boundary
       });
+      
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
+      }
       
       const data = await response.json();
       
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to upload image');
-      }
-      
-      // Update the session with the new image URL
+      // Update the user's profile with the new image URL
       await update({
         ...session,
         user: {
-          ...session?.user,
+          ...session.user,
           image: data.url,
         },
       });
       
-      // Clear the preview URL after successful upload
-      setPreviewUrl('');
+      // Close the modal
+      setIsUploadModalOpen(false);
       
-      // Show success message (optional)
-      // You can add a toast notification here if you have one
-      console.log('Profile picture updated successfully');
-    } catch (err: any) {
-      console.error('Error uploading profile picture:', err);
-      setError(err.message || 'Failed to upload profile picture. Please try again.');
+      // Show success message
+      if (typeof window !== 'undefined') {
+        const { toast } = await import('react-hot-toast');
+        toast.success('Profile picture updated successfully');
+      }
+    } catch (err) {
+      console.error('Error uploading file:', err);
+      setError('Failed to upload image. Please try again.');
     } finally {
       setIsLoading(false);
     }
+  }, [session, update]);
+  
+  const handlePreviewUrlChange = (url: string) => {
+    setPreviewUrl(url);
   };
 
   if (status === 'loading' || !sessionData) {
@@ -138,17 +138,12 @@ export default function ProfilePage() {
 
       <FileUploadModal
         isOpen={isUploadModalOpen}
-        onClose={() => {
-          setIsUploadModalOpen(false);
-          setPreviewUrl('');
-          setSelectedFile(null);
-        }}
+        onClose={() => setIsUploadModalOpen(false)}
         onFileSelect={handleFileSelect}
-        onUpload={handleUpload}
-        accept="image/*"
-        maxSizeMB={5}
         previewUrl={previewUrl}
-        isLoading={isLoading}
+        maxSizeMB={5}
+        aspectRatio={1}
+        onPreviewUrlChange={handlePreviewUrlChange}
       />
     </div>
   );
