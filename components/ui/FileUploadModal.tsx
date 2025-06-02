@@ -1,15 +1,11 @@
 'use client';
 
-import React, {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Upload, Crop, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import styles from './FileUploadModal.module.css';
 import { ImageCropper } from './ImageCropper';
+import debounce from 'lodash/debounce';
 
 interface UploadModalProps {
   isOpen: boolean;
@@ -21,7 +17,7 @@ interface UploadModalProps {
   isLoading?: boolean;
 }
 
-export function UploadModal({
+export const UploadModal = ({
   isOpen,
   onClose,
   onSave,
@@ -29,144 +25,169 @@ export function UploadModal({
   maxSizeMB = 5,
   aspectRatio = 1,
   isLoading = false,
-}: UploadModalProps) {
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+}: UploadModalProps) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(initialPreviewUrl || null);
   const [croppedImage, setCroppedImage] = useState<string | null>(null);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
   const [isCropping, setIsCropping] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
-  const originalFileRef = useRef<File | null>(null);
-  
-  // Update local preview URL when the prop changes
-  useEffect(() => {
-    setPreviewUrl(initialPreviewUrl || null);
-  }, [initialPreviewUrl]);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const createAndTrackBlobUrl = useCallback((blob: Blob): string => {
+    if (!blob) throw new Error('createAndTrackBlobUrl requires a valid blob');
+    const url = URL.createObjectURL(blob);
+    return url;
+  }, []);
 
   useEffect(() => {
-    return () => {
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
+    const revokeUrl = (url: string) => {
+      if (url && url.startsWith('blob:')) {
+        URL.revokeObjectURL(url);
       }
     };
-  }, [previewUrl]);
+
+    return () => {
+      revokeUrl(previewUrl || '');
+      revokeUrl(croppedImage || '');
+    };
+  }, [previewUrl, croppedImage]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > maxSizeMB * 1024 * 1024) {
-      setError(`File size exceeds ${maxSizeMB}MB`);
-      return;
-    }
+    if (!file || file.size > maxSizeMB * 1024 * 1024) return;
 
-    const url = URL.createObjectURL(file);
+    const url = createAndTrackBlobUrl(file);
     setPreviewUrl(url);
     setCroppedImage(null);
-    originalFileRef.current = file;
     setIsCropping(true);
     setError(null);
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    setIsDragging(false);
+  };
+
+  const handleDragLeave = () => setIsCropping(false);
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsCropping(true);
     if (e.dataTransfer.files?.length) {
-      handleFileChange({ target: { files: e.dataTransfer.files } } as any);
+      await handleFileChange({ target: { files: e.dataTransfer.files } } as any);
     }
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = () => setIsDragging(false);
-
-  const getCroppedImg = async (
-    imageSrc: string,
-    pixelCrop: any
-  ): Promise<string> => {
-    const image = await createImage(imageSrc);
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    if (!ctx) throw new Error('Canvas context error');
-
-    canvas.width = pixelCrop.width;
-    canvas.height = pixelCrop.height;
-    ctx.drawImage(
-      image,
-      pixelCrop.x,
-      pixelCrop.y,
-      pixelCrop.width,
-      pixelCrop.height,
-      0,
-      0,
-      pixelCrop.width,
-      pixelCrop.height
-    );
-
-    return new Promise((resolve) => {
-      canvas.toBlob((blob) => {
-        if (!blob) return;
-        const croppedUrl = URL.createObjectURL(blob);
-        resolve(croppedUrl);
-      }, 'image/jpeg', 0.9);
+  const getCroppedImg = useCallback((src: string, pixelCrop: any): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      if (!src || !pixelCrop) {
+        reject(new Error('Invalid parameters'));
+        return;
+      }
+  
+      // If src is a blob URL that's been revoked, reject immediately
+      if (src.startsWith('blob:') && !URL.createObjectURL) {
+        reject(new Error('Blob URL no longer valid'));
+        return;
+      }
+  
+      const image = new Image();
+      image.crossOrigin = 'anonymous';
+      
+      image.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            throw new Error('Could not get canvas context');
+          }
+  
+          canvas.width = pixelCrop.width;
+          canvas.height = pixelCrop.height;
+          
+          ctx.drawImage(
+            image,
+            pixelCrop.x,
+            pixelCrop.y,
+            pixelCrop.width,
+            pixelCrop.height,
+            0,
+            0,
+            pixelCrop.width,
+            pixelCrop.height
+          );
+  
+          canvas.toBlob((blob) => {
+            if (!blob) {
+              reject(new Error('Failed to create blob'));
+              return;
+            }
+            const url = createAndTrackBlobUrl(blob);
+            resolve(url);
+          }, 'image/jpeg', 0.9);
+        } catch (err) {
+          reject(err);
+        }
+      };
+  
+      image.onerror = () => {
+        reject(new Error('Failed to load image'));
+      };
+  
+      // Set src last to ensure event handlers are in place
+      image.src = src;
     });
-  };
-
-  const createImage = (url: string): Promise<HTMLImageElement> =>
-    new Promise((resolve, reject) => {
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.onload = () => resolve(img);
-      img.onerror = reject;
-      img.src = url;
-    });
+  }, [createAndTrackBlobUrl]);
 
   const handleCropComplete = useCallback(
-    async (_: any, croppedPixels: any) => {
-      setCroppedAreaPixels(croppedPixels);
-      if (previewUrl && croppedPixels) {
-        try {
-          const croppedUrl = await getCroppedImg(previewUrl, croppedPixels);
-          setCroppedImage(croppedUrl);
-        } catch (err) {
-          console.error(err);
-          setError('Cropping failed');
-        }
+    debounce(async (_: any, croppedPixels: any) => {
+      if (!croppedPixels || !previewUrl) return;
+      
+      try {
+        const croppedUrl = await getCroppedImg(previewUrl, croppedPixels);
+        setCroppedImage(croppedUrl);
+      } catch (err) {
+        console.error('Error during crop:', err);
+        // Don't set error state for crop operations to avoid UI flickering
       }
-    },
-    [previewUrl]
+    }, 300), // 300ms debounce time
+    [previewUrl, getCroppedImg]
   );
 
+  useEffect(() => {
+    return () => {
+      // Cleanup debounced function
+      handleCropComplete.cancel?.();
+    };
+  }, [handleCropComplete]);
+  
+
   const handleSave = async () => {
-    if (!croppedImage || !originalFileRef.current) return;
-    
+    if (!croppedImage || isSaving) return;
+
+    setIsSaving(true);
+
     try {
       const response = await fetch(croppedImage);
       const blob = await response.blob();
-      const file = new File([blob], originalFileRef.current.name, {
-        type: blob.type || 'image/jpeg', // Default to jpeg if type not available
+      const file = new File([blob], previewUrl!.split('/').pop()!, {
+        type: blob.type || 'image/jpeg',
       });
-      
       onSave(file, croppedImage);
     } catch (err) {
       console.error('Error saving cropped image:', err);
-      setError('Failed to save image. Please try again.');
+      setError('Failed to save image');
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const handleStartCropping = () => setIsCropping(true);
-  const handleCancelCropping = () => {
-    setIsCropping(false);
-    setCroppedImage(null);
-  };
+  const handleCancelCropping = () => setIsCropping(false);
 
-  const handleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    fileInputRef.current?.click();
-  };
+  const handleStartCropping = () => setIsCropping(true);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleClick = () => fileInputRef.current?.click();
 
   const handleClose = () => {
     setPreviewUrl(null);
@@ -179,17 +200,14 @@ export function UploadModal({
   if (!isOpen) return null;
 
   return (
-    <div
-      className={styles.modalOverlay}
-      onClick={(e) => e.target === e.currentTarget && handleClose()}
-    >
+    <div className={styles.modalOverlay} onClick={(e) => e.target === e.currentTarget && handleClose()}>
       <div
-        className={`${styles.modalContent} ${isDragging ? styles.dragging : ''}`}
+        className={styles.modalContent}
         onClick={(e) => e.stopPropagation()}
       >
         <div className={styles.modalHeader}>
           <h3>Upload Profile Picture</h3>
-          <button className={styles.closeButton} onClick={handleClose} aria-label="Close">
+          <button onClick={handleClose} className={styles.closeButton} aria-label="Close">
             <X size={20} />
           </button>
         </div>
@@ -211,32 +229,26 @@ export function UploadModal({
           {isCropping && previewUrl ? (
             <div className={styles.cropperWrapper}>
               <ImageCropper
-                image={croppedImage || previewUrl}
+                image={previewUrl}
+                aspect={aspectRatio}
                 onCropComplete={handleCropComplete}
                 onCancel={handleCancelCropping}
                 onSave={handleSave}
-                aspect={aspectRatio}
-              />
+              /> 
             </div>
           ) : (
             <>
               <div className={styles.dropZone} onClick={handleClick}>
                 {previewUrl ? (
                   <div className={styles.previewContainer}>
-                    <img
-                      src={croppedImage || previewUrl}
-                      alt="Preview"
-                      className={styles.previewImage}
-                    />
+                    <img src={croppedImage || previewUrl} alt="Preview" className={styles.previewImage} />
                   </div>
                 ) : (
                   <div className={styles.dropZoneContent}>
                     <Upload size={48} className={styles.uploadIcon} />
                     <h3 className={styles.title}>Drag and drop your image here</h3>
                     <p className={styles.description}>or click to browse files</p>
-                    <p className={styles.smallText}>
-                      Supports JPG, PNG up to {maxSizeMB}MB
-                    </p>
+                    <p className={styles.smallText}>Supports JPG, PNG up to {maxSizeMB}MB</p>
                   </div>
                 )}
               </div>
@@ -245,23 +257,18 @@ export function UploadModal({
 
               {previewUrl && (
                 <div className={styles.actions}>
-                  <Button onClick={handleClose}>
-                    Cancel
-                  </Button>
+                  <Button onClick={handleClose}>Cancel</Button>
                   <div className={styles.actionGroup}>
-                    <Button
-                      onClick={handleStartCropping}
-                      className={styles.cropButton}
-                    >
+                    <Button onClick={handleStartCropping} className={styles.cropButton}>
                       <Crop size={16} />
                       <span>Adjust</span>
                     </Button>
-                    <Button
-                      onClick={handleSave}
-                      disabled={isLoading}
+                    <Button 
+                      onClick={handleSave} 
+                      disabled={isLoading || isSaving} 
                       className={styles.uploadButton}
                     >
-                      {isLoading ? 'Saving...' : 'Save Picture'}
+                      {isLoading || isSaving ? 'Saving...' : 'Save Picture'}
                     </Button>
                   </div>
                 </div>
@@ -272,4 +279,4 @@ export function UploadModal({
       </div>
     </div>
   );
-}
+};
