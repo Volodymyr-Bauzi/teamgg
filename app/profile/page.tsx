@@ -3,8 +3,8 @@
 import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 import { signOut } from 'next-auth/react';
-import { useState, useCallback } from 'react';
-import { FileUploadModal } from '@/components/ui/FileUploadModal';
+import { useState, useCallback, useEffect } from 'react';
+import { UploadModal } from '@/components/ui/FileUploadModal';
 import { EditableAvatar } from '@/components/ui/EditableAvatar';
 import styles from './Profile.module.css';
 
@@ -15,6 +15,8 @@ export default function ProfilePage() {
   const [error, setError] = useState('');
   const [previewUrl, setPreviewUrl] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { data: sessionData, status } = useSession({
     required: true,
@@ -25,18 +27,15 @@ export default function ProfilePage() {
 
   // Create a preview URL for the selected image
   const handleFileSelect = useCallback((file: File | null) => {
-    if (!file) {
-      setIsUploadModalOpen(true);
-      return;
-    }
+    if (!file) return;
     
     setSelectedFile(file);
     const url = URL.createObjectURL(file);
     setPreviewUrl(url);
-    setIsUploadModalOpen(true);
+    setIsModalOpen(true);
   }, []);
 
-  const handleFileUpload = useCallback(async (file: File) => {
+  const handleSave = useCallback(async (file: File, croppedImageUrl: string) => {
     if (!file || !session) return;
     
     setIsLoading(true);
@@ -59,6 +58,9 @@ export default function ProfilePage() {
       
       const data = await response.json();
       
+      // Update the preview URL with the cropped version
+      setPreviewUrl(croppedImageUrl);
+      
       // Update the user's profile with the new image URL
       await update({
         ...session,
@@ -68,14 +70,17 @@ export default function ProfilePage() {
         },
       });
       
-      // Close the modal
-      setIsUploadModalOpen(false);
+      // Update the preview URL with the cropped version
+      setPreviewUrl(croppedImageUrl);
       
       // Show success message
       if (typeof window !== 'undefined') {
         const { toast } = await import('react-hot-toast');
         toast.success('Profile picture updated successfully');
       }
+      
+      // Close the modal
+      setIsModalOpen(false);
     } catch (err) {
       console.error('Error uploading file:', err);
       setError('Failed to upload image. Please try again.');
@@ -84,9 +89,15 @@ export default function ProfilePage() {
     }
   }, [session, update]);
   
-  const handlePreviewUrlChange = (url: string) => {
-    setPreviewUrl(url);
-  };
+  // Clean up object URLs when component unmounts or previewUrl changes
+  useEffect(() => {
+    const currentPreviewUrl = previewUrl;
+    return () => {
+      if (currentPreviewUrl) {
+        URL.revokeObjectURL(currentPreviewUrl);
+      }
+    };
+  }, [previewUrl]);
 
   if (status === 'loading' || !sessionData) {
     return <div>Loading...</div>;
@@ -118,7 +129,7 @@ export default function ProfilePage() {
           <div className={styles.buttonGroup}>
             <button 
               className={styles.button}
-              onClick={() => setIsUploadModalOpen(true)}
+              onClick={() => setIsModalOpen(true)}
             >
               Change Profile Picture
             </button>
@@ -136,14 +147,21 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <FileUploadModal
-        isOpen={isUploadModalOpen}
-        onClose={() => setIsUploadModalOpen(false)}
-        onFileSelect={handleFileSelect}
+      <UploadModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          if (previewUrl) {
+            URL.revokeObjectURL(previewUrl);
+          }
+          setPreviewUrl('');
+          setSelectedFile(null);
+          setIsModalOpen(false);
+        }}
+        onSave={handleSave}
         previewUrl={previewUrl}
         maxSizeMB={5}
         aspectRatio={1}
-        onPreviewUrlChange={handlePreviewUrlChange}
+        isLoading={isUploading}
       />
     </div>
   );
