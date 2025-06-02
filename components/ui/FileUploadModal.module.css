@@ -14,14 +14,13 @@
 
 .modalContent {
   background: var(--background);
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 2rem;
   width: 100%;
   max-width: 500px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   position: relative;
-  border: 2px dashed transparent;
-  transition: border-color 0.2s;
+  overflow: hidden;
 }
 
 .modalContent.dragging {
@@ -48,6 +47,10 @@
   color: var(--text);
 }
 
+.modalBody {
+  padding: 1rem 0;
+}
+
 .dropZone {
   border: 2px dashed var(--border-color, #e5e7eb);
   border-radius: 8px;
@@ -56,12 +59,33 @@
   cursor: pointer;
   transition: all 0.2s;
   background-color: var(--background);
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
 }
 
 .dropZone:hover,
 .dropZone:focus {
   border-color: var(--primary-color, #3b82f6);
   background-color: var(--hover-bg, #f9fafb);
+}
+
+.previewContainer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.previewImage {
+  max-width: 100%;
+  max-height: 400px;
+  object-fit: contain;
+  border-radius: 4px;
 }
 
 .dropZoneContent {
@@ -99,6 +123,48 @@
   color: #ef4444;
   margin-top: 1rem;
   font-size: 0.875rem;
+  text-align: center;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.uploadButton,
+.cancelButton {
+  padding: 0.5rem 1.25rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.uploadButton {
+  background-color: var(--primary-color, #3b82f6);
+  color: white;
+  border: none;
+}
+
+.uploadButton:hover:not(:disabled) {
+  background-color: var(--primary-dark, #2563eb);
+}
+
+.uploadButton:disabled {
+  background-color: var(--muted, #9ca3af);
+  cursor: not-allowed;
+}
+
+.cancelButton {
+  background-color: transparent;
+  border: 1px solid var(--border-color, #e5e7eb);
+  color: var(--text);
+}
+
+.cancelButton:hover {
+  background-color: var(--hover-bg, #f3f4f6);
 }
 
 .fileInput {

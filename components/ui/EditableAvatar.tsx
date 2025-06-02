@@ -27,9 +27,7 @@ export function EditableAvatar({
     }
   };
 
-  const handleClick = () => {
-    fileInputRef.current?.click();
-  };
+  // Removed direct file input click, will be handled by modal
 
   return (
     <div 
@@ -45,21 +43,14 @@ export function EditableAvatar({
           className={styles.changeButton}
           onClick={(e) => {
             e.stopPropagation();
-            handleClick();
+            // Call the parent's onChange with null to indicate we want to show the modal
+            onChange?.(null as any);
           }}
           aria-label="Change profile picture"
         >
           <Camera className={styles.icon} />
         </button>
       </div>
-      
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileChange}
-        className={styles.fileInput}
-        accept="image/*"
-      />
     </div>
   );
 }

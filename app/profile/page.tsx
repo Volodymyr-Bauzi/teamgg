@@ -14,6 +14,7 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [previewUrl, setPreviewUrl] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const { data: sessionData, status } = useSession({
     required: true,
@@ -24,13 +25,18 @@ export default function ProfilePage() {
 
   // Create a preview URL for the selected image
   const handleFileSelect = useCallback((file: File) => {
+    setSelectedFile(file);
     const url = URL.createObjectURL(file);
     setPreviewUrl(url);
-    
-    // Here you would typically upload the file to your server
-    // and update the user's profile picture URL
-    uploadProfilePicture(file);
+    setIsUploadModalOpen(true);
   }, []);
+  
+  const handleUpload = useCallback(() => {
+    if (selectedFile) {
+      uploadProfilePicture(selectedFile);
+      setIsUploadModalOpen(false);
+    }
+  }, [selectedFile]);
 
   const uploadProfilePicture = async (file: File) => {
     if (!file) return;
@@ -42,17 +48,17 @@ export default function ProfilePage() {
       const formData = new FormData();
       formData.append('file', file);
       
-      // Replace this with your actual API endpoint
       const response = await fetch('/api/upload-profile-picture', {
         method: 'POST',
         body: formData,
+        // Important: Don't set Content-Type header, let the browser set it with the boundary
       });
       
-      if (!response.ok) {
-        throw new Error('Failed to upload image');
-      }
-      
       const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to upload image');
+      }
       
       // Update the session with the new image URL
       await update({
@@ -65,9 +71,13 @@ export default function ProfilePage() {
       
       // Clear the preview URL after successful upload
       setPreviewUrl('');
-    } catch (err) {
+      
+      // Show success message (optional)
+      // You can add a toast notification here if you have one
+      console.log('Profile picture updated successfully');
+    } catch (err: any) {
       console.error('Error uploading profile picture:', err);
-      setError('Failed to upload profile picture. Please try again.');
+      setError(err.message || 'Failed to upload profile picture. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -89,11 +99,7 @@ export default function ProfilePage() {
               src={avatarUrl}
               alt={user?.name || 'User'}
               size="lg"
-              onChange={(file) => {
-                const url = URL.createObjectURL(file);
-                setPreviewUrl(url);
-                setIsUploadModalOpen(true);
-              }}
+              onChange={handleFileSelect}
             />
           </div>
           <div className={styles.userInfo}>
@@ -127,10 +133,17 @@ export default function ProfilePage() {
 
       <FileUploadModal
         isOpen={isUploadModalOpen}
-        onClose={() => setIsUploadModalOpen(false)}
+        onClose={() => {
+          setIsUploadModalOpen(false);
+          setPreviewUrl('');
+          setSelectedFile(null);
+        }}
         onFileSelect={handleFileSelect}
+        onUpload={handleUpload}
         accept="image/*"
         maxSizeMB={5}
+        previewUrl={previewUrl}
+        isLoading={isLoading}
       />
     </div>
   );
