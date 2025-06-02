@@ -37,7 +37,7 @@ export default function Providers({children}: {children: ReactNode}) {
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
         <QueryClientProvider client={queryClient}>
           <ThemeProvider
-            attribute="class"
+            attribute="data-theme"
             defaultTheme="system"
             enableSystem
             disableTransitionOnChange

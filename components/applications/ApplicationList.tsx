@@ -6,6 +6,38 @@ import ApplicationCard from './ApplicationCard';
 import {useState} from 'react';
 import Pagination from '../Pagination';
 import {trpc} from '@/lib/trpc/client';
+import type { JsonValue } from '@prisma/client/runtime/library';
+
+type ApplicationWithUser = {
+  id: string;
+  userId: string;
+  contact: string;
+  tags: JsonValue;
+  gameId: string;
+  createdAt: Date;
+};
+
+const normalizeTags = (tags: JsonValue): Record<string, unknown> => {
+  try {
+    if (tags && typeof tags === 'object' && !Array.isArray(tags)) {
+      return tags as Record<string, unknown>;
+    }
+    if (typeof tags === 'string') {
+      try {
+        const parsed = JSON.parse(tags);
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+          return parsed;
+        }
+      } catch (e) {
+        console.error('Error parsing tags:', e);
+      }
+    }
+    return {};
+  } catch (error) {
+    console.error('Error normalizing tags:', error);
+    return {};
+  }
+};
 
 const ITEMS_PER_PAGE = 10; // Pagination limit, can be adjusted
 
@@ -32,10 +64,14 @@ export default function ApplicationList({gameId}: {gameId: string}) {
     );
   }
 
-  const filtered = data.items.filter((app) => {
+  // Cast the items to ApplicationWithUser[] to handle the tags type
+  const applications = data.items as unknown as ApplicationWithUser[];
+  
+  const filtered = applications.filter((app) => {
+    const tags = normalizeTags(app.tags);
     return Object.entries(filters).every(([key, value]) => {
       if (!value) return true;
-      return app.tags?.[key as keyof typeof app.tags] === value;
+      return tags[key] === value;
     });
   });
 
@@ -57,9 +93,6 @@ export default function ApplicationList({gameId}: {gameId: string}) {
           </div>
         ))
       ) : (
-        <p className={styles.noApplications}>No matching teammates found.</p>
-      )}
-      {filtered.length === 0 && (
         <p className={styles.noApplications}>No matching teammates found.</p>
       )}
       {data.totalPages > 1 && (

@@ -86,7 +86,7 @@ export const gameFilterConfig: Record<
         key: 'platform',
         label: 'Platform',
         type: 'select',
-        options: ['Java', 'Bedrock'],
+        options: ['PC', 'PlayStation', 'Xbox', 'Switch'],
       },
       {
         key: 'gameType',

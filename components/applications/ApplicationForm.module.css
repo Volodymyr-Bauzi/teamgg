@@ -1,0 +1,241 @@
+.applicationForm {
+  --form-bg: #ffffff;
+  --form-text: #1a1a1a;
+  --form-border: #e2e8f0;
+  --form-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --form-focus: #4299e1;
+  --form-focus-shadow: rgba(66, 153, 225, 0.2);
+  --form-placeholder: #a0aec0;
+  --form-option-hover: #f7fafc;
+  --form-option-selected: #ebf8ff;
+  --form-arrow: #718096;
+  
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: var(--form-bg);
+  color: var(--form-text);
+  border-radius: 8px;
+  box-shadow: var(--form-shadow);
+  transition: all 0.3s ease;
+}
+
+[data-theme='dark'] .applicationForm {
+  --form-bg: #1a202c;
+  --form-text: #f7fafc;
+  --form-border: #4a5568;
+  --form-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --form-focus: #63b3ed;
+  --form-focus-shadow: rgba(99, 179, 237, 0.3);
+  --form-placeholder: #a0aec0;
+  --form-option-hover: #2d3748;
+  --form-option-selected: #2c5282;
+  --form-arrow: #a0aec0;
+}
+
+.formTitle {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: var(--form-text);
+  transition: color 0.3s ease;
+}
+
+.formField {
+  margin-bottom: 16px;
+}
+
+.contactField {
+  margin-bottom: 20px;
+}
+
+.fieldLabel {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--form-text);
+  opacity: 0.9;
+  transition: color 0.3s ease;
+}
+
+.fieldInput,
+.fieldSelect {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--form-border);
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background-color: var(--form-bg);
+  color: var(--form-text);
+}
+
+.fieldInput::placeholder {
+  color: var(--form-placeholder);
+}
+
+.fieldInput:focus,
+.fieldSelect:focus,
+.multiSelect:focus-within {
+  outline: none;
+  border-color: var(--form-focus);
+  box-shadow: 0 0 0 2px var(--form-focus-shadow);
+}
+
+.fieldInput::placeholder {
+  color: #a0aec0;
+}
+
+.submitButton {
+  width: 100%;
+  padding: 12px;
+  background-color: #4299e1;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.submitButton:hover {
+  background-color: #3182ce;
+}
+
+.submitButton:disabled {
+  background-color: #a0aec0;
+  cursor: not-allowed;
+}
+
+.optionalText {
+  color: #a0aec0;
+  font-size: 0.75rem;
+  margin-left: 4px;
+}
+
+/* MultiSelect specific styles */
+.multiSelect {
+  position: relative;
+  width: 100%;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+.multiSelectControl {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--form-border);
+  border-radius: 4px;
+  background-color: var(--form-bg);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+  min-height: 42px;
+}
+
+.multiSelectValue {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--form-text);
+  transition: color 0.2s ease;
+}
+
+.multiSelectArrow {
+  width: 20px;
+  height: 20px;
+  color: var(--form-arrow);
+  transition: transform 0.2s ease, color 0.2s ease;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.multiSelectArrow.isOpen {
+  transform: rotate(180deg);
+}
+
+.multiSelectDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: var(--form-bg);
+  border: 1px solid var(--form-border);
+  border-radius: 4px;
+  box-shadow: var(--form-shadow);
+  z-index: 50;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 4px 0;
+  transition: all 0.3s ease;
+}
+
+.multiSelectOption {
+  padding: 8px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s ease;
+  color: var(--form-text);
+}
+
+.multiSelectOption:hover {
+  background-color: var(--form-option-hover);
+}
+
+.multiSelectOption.isSelected {
+  background-color: var(--form-option-selected);
+  color: var(--form-focus);
+  font-weight: 500;
+}
+
+.multiSelectCheckbox {
+  margin-right: 12px;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: hsl(217, 91%, 60%);
+}
+
+/* Dark mode styles */
+.dark .multiSelectControl {
+  background-color: hsl(222, 47%, 11%);
+  border-color: hsl(214, 32%, 20%);
+  color: hsl(210, 40%, 98%);
+}
+
+.dark .multiSelectControl:hover {
+  border-color: hsl(214, 32%, 25%);
+}
+
+.dark .multiSelectValue {
+  color: hsl(210, 40%, 98%);
+}
+
+.dark .multiSelectDropdown {
+  background-color: hsl(222, 47%, 11%);
+  border-color: hsl(214, 32%, 20%);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+}
+
+.dark .multiSelectOption {
+  color: hsl(210, 40%, 98%);
+}
+
+.dark .multiSelectOption:hover {
+  background-color: hsl(214, 32%, 15%);
+}
+
+.dark .multiSelectOption.isSelected {
+  background-color: hsl(217, 91%, 15%);
+  color: hsl(217, 91%, 70%);
+}
+
+.dark .multiSelectArrow {
+  color: hsl(215, 16%, 57%);
+}

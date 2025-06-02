@@ -22,8 +22,15 @@ export const applicationRouter = createTRPCRouter({
         }),
         ctx.db.application.count({where: {gameId}}),
       ]);
+      
+      // Ensure tags is always an object
+      const formattedItems = items.map(item => ({
+        ...item,
+        tags: item.tags || {}
+      }));
+      
       return {
-        items,
+        items: formattedItems,
         total,
         page,
         totalPages: Math.ceil(total / limit),
@@ -36,17 +43,21 @@ export const applicationRouter = createTRPCRouter({
         gameId: z.string(),
         contact: z.string(),
         tags: z.record(z.string()),
+        userId: z.string().optional(),
       })
     )
     .mutation(async ({ctx, input}) => {
+      const userId = ctx.user?.id || input.userId;
+      if (!userId) {
+        throw new Error('User ID is required');
+      }
+
       return await ctx.db.application.create({
         data: {
-          ...input,
-          userId:
-            ctx.user?.id ??
-            (() => {
-              throw new Error('User ID is required');
-            })(),
+          gameId: input.gameId,
+          contact: input.contact,
+          tags: input.tags,
+          userId,
         },
       });
     }),

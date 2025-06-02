@@ -1,36 +1,70 @@
 .container {
+  --page-bg: #f9f9f9;
+  --card-bg: #ffffff;
+  --card-border: #e0e0e0;
+  --card-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --card-hover-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --text-tertiary: #999999;
+  --pagination-bg: #ffffff;
+  --pagination-hover: #007bff;
+  --pagination-text: #333333;
+  --pagination-hover-text: #ffffff;
+  --pagination-disabled: #f0f0f0;
+  
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
   padding: 16px;
-  background-color: #f9f9f9;
+  background-color: var(--page-bg);
   min-height: calc(100vh - 64px); /* Adjust for header height */
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+[data-theme='dark'] .container {
+  --page-bg: #1a1a1a;
+  --card-bg: #2d2d2d;
+  --card-border: #404040;
+  --card-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --card-hover-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  --text-primary: #f0f0f0;
+  --text-secondary: #cccccc;
+  --text-tertiary: #999999;
+  --pagination-bg: #3d3d3d;
+  --pagination-hover: #1a73e8;
+  --pagination-text: #f0f0f0;
+  --pagination-hover-text: #ffffff;
+  --pagination-disabled: #2d2d2d;
 }
 
 .leftSidebar {
   flex: 1;
   max-width: 200px;
-  background-color: #ffffff;
+  background-color: var(--card-bg);
   padding: 16px;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--card-shadow);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .content {
   flex: 3;
-  background-color: #ffffff;
+  background-color: var(--card-bg);
   padding: 16px;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--card-shadow);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .rightSidebar {
   flex: 1;
   max-width: 200px;
-  background-color: #ffffff;
+  background-color: var(--card-bg);
   padding: 16px;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--card-shadow);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .appList {
@@ -40,28 +74,28 @@
 }
 
 .applicationCard {
-  background-color: #ffffff;
-  border: 1px solid #e0e0e0;
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
   border-radius: 8px;
   padding: 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: var(--card-shadow);
+  transition: all 0.3s ease;
 }
 
 .applicationCard:hover {
   transform: translateY(-4px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--card-hover-shadow);
 }
 
 .applicationCard h3 {
   font-size: 1.25rem;
   margin-bottom: 8px;
-  color: #333333;
+  color: var(--text-primary);
 }
 
 .applicationCard p {
   margin: 4px 0;
-  color: #666666;
+  color: var(--text-secondary);
 }
 
 .applicationCard ul {
@@ -72,12 +106,12 @@
 
 .applicationCard ul li {
   margin: 4px 0;
-  color: #444444;
+  color: var(--text-secondary);
 }
 
 .noApplications {
   text-align: center;
-  color: #999999;
+  color: var(--text-tertiary);
   font-size: 1rem;
   margin-top: 16px;
 }
@@ -90,21 +124,24 @@
 }
 
 .pagination button {
-  background-color: #ffffff;
-  border: 1px solid #e0e0e0;
+  background-color: var(--pagination-bg);
+  border: 1px solid var(--card-border);
   border-radius: 4px;
   padding: 8px 12px;
+  color: var(--pagination-text);
   cursor: pointer;
-  transition: background-color 0.2s, color 0.2s;
+  transition: all 0.3s ease;
 }
 
-.pagination button:hover {
-  background-color: #007bff;
-  color: #ffffff;
+.pagination button:hover:not(:disabled) {
+  background-color: var(--pagination-hover);
+  color: var(--pagination-hover-text);
+  border-color: transparent;
 }
 
 .pagination button:disabled {
-  background-color: #f0f0f0;
-  color: #cccccc;
+  background-color: var(--pagination-disabled);
+  color: var(--text-tertiary);
   cursor: not-allowed;
+  opacity: 0.7;
 }

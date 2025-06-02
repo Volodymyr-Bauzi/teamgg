@@ -48,6 +48,10 @@ const enforceUserIsAuthed = t.middleware(async ({ctx, next}) => {
   });
 });
 
+// Re-export the router and procedures for use in other files
 export const createTRPCRouter = t.router;
+export const router = t.router;
 export const publicProcedure = t.procedure;
 export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
+
+export type TRPCRouter = typeof t.router;
